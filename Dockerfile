@@ -4,7 +4,7 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (needed for PyTorch/vLLM)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -15,13 +15,16 @@ RUN apt-get update && apt-get install -y \
 # Install the specific CPU-only PyTorch version that vLLM needs
 RUN pip install --no-cache-dir torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu
 
-# Install vLLM (it will now see its torch dependency is satisfied)
+# FIX: Install a compatible version of NumPy before installing vLLM
+RUN pip install --no-cache-dir "numpy<2.0"
+
+# Install vLLM (it will now use the correct NumPy version)
 RUN pip install --no-cache-dir --prefer-binary vllm==0.4.0.post1
 
 # Expose Railway port
 EXPOSE 8000
 
-# Run vLLM API server, using Railway's injected $PORT and $VLLM_API_KEY
+# Run vLLM API server
 CMD sh -c 'python -m vllm.entrypoints.openai.api_server \
     --model gpt2 \
     --device cpu \
