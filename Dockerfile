@@ -12,10 +12,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install CPU-only PyTorch first (from official index)
-RUN pip install --no-cache-dir torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+# Install the specific CPU-only PyTorch version that vLLM needs
+RUN pip install --no-cache-dir torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu
 
-# Install vLLM (force wheels, avoid source build)
+# Install vLLM (it will now see its torch dependency is satisfied)
 RUN pip install --no-cache-dir --prefer-binary vllm==0.4.0.post1
 
 # Expose Railway port
